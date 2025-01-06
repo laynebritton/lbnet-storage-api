@@ -17,26 +17,7 @@ export class FileController {
     @Body('destinationFolder') destinationFolder: string,
     @Body('destinationPath') destinationPath: string,
   ) {
-    const pathPrefix = 'C:/Users/layne_000/Documents/Code/lbnet-storage';
-    const fileName = file.originalname;
-    const destinationFolderPath = join(
-      pathPrefix,
-      destinationFolder,
-      destinationPath,
-    );
-    const destination = join(destinationFolderPath, fileName);
-
-    // Ensure the destination folder exists
-    if (!existsSync(destinationFolderPath)) {
-      mkdirSync(destinationFolderPath, { recursive: true }); // Create folder recursively
-    }
-
-    const writeStream = createWriteStream(destination, { flags: 'w' });
-    writeStream.write(file.buffer);
-    writeStream.end();
-    writeStream.on('close', function () {
-      console.log(`[Log] File ${destination} written`);
-    });
+    this.fileService.uploadFile(file, destinationFolder, destinationPath);
   }
 
   @Get()
