@@ -25,7 +25,7 @@ export class FileService {
 
       // Ensure the destination folder exists
       if (!existsSync(destinationFolderPath)) {
-        mkdirSync(destinationFolderPath, { recursive: true }); // Create folder recursively
+        mkdirSync(destinationFolderPath, { recursive: true });
       }
 
       const writeStream = createWriteStream(destination, { flags: 'w' });
