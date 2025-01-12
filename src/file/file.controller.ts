@@ -3,9 +3,6 @@ import {
   Get,
   Post,
   Body,
-  Patch,
-  Param,
-  Delete,
   UseInterceptors,
   UploadedFile,
   HttpStatus,
@@ -13,12 +10,9 @@ import {
   StreamableFile,
 } from '@nestjs/common';
 import { FileService } from './file.service';
-import { CreateFileDto } from './dto/create-file.dto';
-import { UpdateFileDto } from './dto/update-file.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { createReadStream, createWriteStream, existsSync, mkdirSync } from 'fs';
-import { join } from 'path';
 import { ConfigService } from '@nestjs/config';
+import { GetFileDto } from './dto/get-file.dto';
 
 @Controller('file')
 export class FileController {
@@ -42,11 +36,12 @@ export class FileController {
   }
 
   @Get('get')
-  getFile(
-    @Query('destination') destination: string,
-    @Query('fileName') fileName: string,
-  ): StreamableFile {
+  getFile(@Query() query: GetFileDto): StreamableFile {
+    const { destination, fileName, API_KEY } = query;
+    if (API_KEY !== this.configService.get('API_KEY')) {
+      console.log(`[Log] Unauthorized access attempt for: ${destination} / ${fileName} - using API_KEY: ${API_KEY}`)
+      return null;
+    }
     return this.fileService.getFile(destination, fileName);
   }
-
 }
