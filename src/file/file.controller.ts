@@ -9,12 +9,14 @@ import {
   UseInterceptors,
   UploadedFile,
   HttpStatus,
+  Query,
+  StreamableFile,
 } from '@nestjs/common';
 import { FileService } from './file.service';
 import { CreateFileDto } from './dto/create-file.dto';
 import { UpdateFileDto } from './dto/update-file.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { createWriteStream, existsSync, mkdirSync } from 'fs';
+import { createReadStream, createWriteStream, existsSync, mkdirSync } from 'fs';
 import { join } from 'path';
 import { ConfigService } from '@nestjs/config';
 
@@ -33,29 +35,18 @@ export class FileController {
     @Body('destinationPath') destinationPath: string,
     @Body('API_KEY') API_KEY: string,
   ) {
-    if(API_KEY !== this.configService.get("API_KEY")) {
+    if (API_KEY !== this.configService.get('API_KEY')) {
       return HttpStatus.UNAUTHORIZED;
     }
     this.fileService.uploadFile(file, destinationFolder, destinationPath);
   }
 
-  @Get()
-  findAll() {
-    return this.fileService.findAll();
+  @Get('get')
+  getFile(
+    @Query('destination') destination: string,
+    @Query('fileName') fileName: string,
+  ): StreamableFile {
+    return this.fileService.getFile(destination, fileName);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.fileService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateFileDto: UpdateFileDto) {
-    return this.fileService.update(+id, updateFileDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.fileService.remove(+id);
-  }
 }

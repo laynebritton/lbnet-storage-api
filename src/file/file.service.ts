@@ -1,7 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, StreamableFile } from '@nestjs/common';
 import { CreateFileDto } from './dto/create-file.dto';
 import { UpdateFileDto } from './dto/update-file.dto';
-import { createWriteStream, existsSync, mkdirSync } from 'fs';
+import { createReadStream, createWriteStream, existsSync, mkdirSync } from 'fs';
 import { join, resolve } from 'path';
 import { ConfigService } from '@nestjs/config';
 
@@ -38,19 +38,19 @@ export class FileService {
     });
   }
 
-  findAll() {
-    return `This action returns all file`;
-  }
+  getFile(destination: string, fileName: string): StreamableFile {
+    const path = join(
+      this.configService.get<string>('ROOT_DIRECTORY'),
+      destination,
+      fileName,
+    );
+    const fileStream = createReadStream(path);
 
-  findOne(id: number) {
-    return `This action returns a #${id} file`;
-  }
+    console.log(`[Log] File ${path} downloaded at: ${Date.now()}`)
 
-  update(id: number, updateFileDto: UpdateFileDto) {
-    return `This action updates a #${id} file`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} file`;
+    return new StreamableFile(fileStream, {
+      type: 'application/octet-stream',
+      disposition: `attachment; filename="${fileName}"`,
+    });
   }
 }
